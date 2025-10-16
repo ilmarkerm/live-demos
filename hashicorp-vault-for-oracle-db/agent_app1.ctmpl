@@ -1,0 +1,12 @@
+[general]
+app_specific_parameter1 = value1
+app_specific_parameter2 = value2
+
+[database]
+pool_min = 5
+pool_max = 5
+dsn = tcps://databasehost.example:org:1523/app1.environment
+{{ with secret "database/creds/app1" -}}
+username = {{ .Data.username }}[app1]
+password = "{{ .Data.password }}"
+{{- end }}
