@@ -21,7 +21,7 @@ resource "vault_policy" "proxy" {
         path "demokv/data/oracle/*" {
             capabilities = ["read","create","update","patch","list"]
         }
-        path "database/creds/app1" {
+        path "database/creds/*" {
             capabilities = ["read"]
         }
         path "ssh-client-signer/sign/oracle" {

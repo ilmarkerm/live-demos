@@ -1,12 +1,12 @@
 pid_file = "/home/oracle/vault/vault.pid"
 
 vault {
-    address = "http://172.17.0.2:8200"
+    address = "http://vault:8200"
 }
 
 auto_auth {
     method {
-    type = "approle"
+        type = "approle"
         mount_path  = "auth/approle"
         config = {
             role_id_file_path                   = "/home/oracle/vault/.roleid"

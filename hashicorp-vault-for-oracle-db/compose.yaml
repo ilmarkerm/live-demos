@@ -1,0 +1,31 @@
+services:
+    oracle:
+        image: hashidemo-oracle_v2
+        build:
+            context: hashidemo-oracle/
+        ports:
+            - 1521:1521
+        environment:
+            - ORACLE_PWD=Oracle123
+        volumes:
+            - type: bind
+              source: hashidemo-oracle/setup
+              target: /opt/oracle/scripts/startup
+            - type: bind
+              source: .
+              target: /live-demos/hashicorp-vault-for-oracle-db
+    vault:
+        image: hashidemo-vault_v2
+        build:
+            context: hashidemo-vault/
+        ports:
+            - 8200:8200
+        volumes:
+            - type: bind
+              source: .
+              target: /live-demos/hashicorp-vault-for-oracle-db
+    sshd:
+        image: lscr.io/linuxserver/openssh-server:latest
+        environment:
+            - USER_NAME=oracle
+            - LOG_STDOUT=true

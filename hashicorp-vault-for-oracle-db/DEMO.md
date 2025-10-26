@@ -4,20 +4,18 @@ Ilmar Kerm 2025 ilmar@ilmarkerm.eu https://ilmarkerm.eu
 
 # Setup
 
+Entrypoints:
+```sh
+docker exec -it hashicorp-vault-for-oracle-db-oracle-1 bash
+docker exec -it hashicorp-vault-for-oracle-db-vault-1 bash
+docker exec -it hashicorp-vault-for-oracle-db-sshd-1 bash
+```
+
 vault:
 ```sh
-export PS1="[\u@\h \W (vault)]\\$ "
-vault server -dev -dev-root-token-id=root -dev-listen-address=0.0.0.0:8200 -config /live-demos/hashicorp-vault-for-oracle-db/server_config.hcl
-
 cd /live-demos/hashicorp-vault-for-oracle-db/terraform
 terraform apply -no-color
 ```
-
-Database:
-```sh
-export PS1="[\u@\h \W (database)]\\$ "
-```
-
 
 # DEMO: plugins, tokens
 
@@ -28,6 +26,7 @@ vault:
 # NB! oracle is not yet here, need to register it first
 vault plugin list|less
 
+# Show in VS code actually
 less /live-demos/hashicorp-vault-for-oracle-db/terraform/backend.tf
 
 vault auth list
@@ -59,20 +58,17 @@ vault write -field=secret_id -f auth/approle/role/demo-proxy/secret-id
 
 database:
 ```sh
-export PS1="[\u@\h \W (database)]\\$ "
 cd /home/oracle/vault
 
-less proxy_config.hcl
+less /live-demos/hashicorp-vault-for-oracle-db/proxy_config.hcl
 echo "" > .roleid
 echo "" > .secretid
+# Start proxy
+vault proxy -config /live-demos/hashicorp-vault-for-oracle-db/proxy_config.hcl
 
 # NEW TAB
 # Do request via proxy and show the token
-export PS1="[\u@\h \W (database)]\\$ "
-export VAULT_ADDR=http://localhost:8200
-unset VAULT_TOKEN
-
-/home/oracle/vault/vault token lookup
+vault token lookup
 ```
 
 # DEMO: Secret engines
@@ -218,7 +214,7 @@ vault (Create database connection):
 vault write database/config/oracle \
     plugin_name=vault-plugin-database-oracle \
     allowed_roles="*" \
-    connection_url='{{username}}/{{password}}@//172.17.0.3:1521/freepdb1' \
+    connection_url='{{username}}/{{password}}@//hashidemo-oracle:1521/freepdb1' \
     username='vault' \
     password='vault'
 
@@ -247,8 +243,8 @@ Show role in GUI.
 database (fetch new database credential for "app1"):
 ```sh
 clear
-/home/oracle/vault/vault read database/creds/app1
-/home/oracle/vault/vault read database/creds/app1
+vault read database/creds/app1
+vault read database/creds/app1
 ```
 
 SQL Developer (dba):
@@ -262,7 +258,7 @@ database (writing config file for application using secrets):
 ```sh
 clear
 less /live-demos/hashicorp-vault-for-oracle-db/agent_app1.ctmpl
-/home/oracle/vault/vault agent -config /live-demos/hashicorp-vault-for-oracle-db/agent_config.hcl
+vault agent -config /live-demos/hashicorp-vault-for-oracle-db/agent_config.hcl
 cat /tmp/agent_app1.config
 ```
 
@@ -302,7 +298,7 @@ docker exec -it hashidemo-sshd bash
 
 SSH server:
 ```sh
-curl -o /config/trusted-user-ca-keys.pem http://172.17.0.2:8200/v1/ssh-client-signer/public_key
+curl -o /config/trusted-user-ca-keys.pem http://vault:8200/v1/ssh-client-signer/public_key
 cat /config/trusted-user-ca-keys.pem
 echo "TrustedUserCAKeys /config/trusted-user-ca-keys.pem" >> /config/sshd/sshd_config
 
@@ -315,12 +311,12 @@ clear
 cat /home/oracle/.ssh/id_rsa.pub
 
 # Demo the certificate output
-/home/oracle/vault/vault write ssh-client-signer/sign/oracle public_key=@$HOME/.ssh/id_rsa.pub
+vault write ssh-client-signer/sign/oracle public_key=@$HOME/.ssh/id_rsa.pub
 
 # Write certificate to file
-/home/oracle/vault/vault write -field=signed_key ssh-client-signer/sign/oracle public_key=@$HOME/.ssh/id_rsa.pub > $HOME/.ssh/id_rsa-cert.pub
+vault write -field=signed_key ssh-client-signer/sign/oracle public_key=@$HOME/.ssh/id_rsa.pub > $HOME/.ssh/id_rsa-cert.pub
 
-ssh oracle@172.17.0.4 -p 2222
+ssh oracle@sshd -p 2222
 ```
 
 Show SSHD container logs to see that last login was done by certificate
@@ -333,9 +329,9 @@ docker logs hashidemo-sshd
 database:
 ```sh
 clear
-/home/oracle/vault/vault kv get demokv/oracle/demodb/deployment
-/home/oracle/vault/vault kv get -wrap-ttl=5m demokv/oracle/demodb/deployment
-/home/oracle/vault/vault unwrap tokenhere
+vault kv get demokv/oracle/demodb/deployment
+vault kv get -wrap-ttl=5m demokv/oracle/demodb/deployment
+vault unwrap tokenhere
 
 # To wrap getting a secret, add X-Vault-Wrap-Ttl header
 curl -H "X-Vault-Wrap-Ttl: 5m0s" -X GET http://127.0.0.1:8200/v1/demokv/data/oracle/demodb/deployment | python -m json.tool

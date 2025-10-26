@@ -1,5 +1,5 @@
 vault {
-    address = "http://172.17.0.2:8200"
+    address = "http://vault:8200"
 }
 
 # If false, will keep running in the background and renewing secrets when needed

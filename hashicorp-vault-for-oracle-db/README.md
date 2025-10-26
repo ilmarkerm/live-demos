@@ -24,27 +24,3 @@ docker start --interactive hashidemo-vault
 
 docker logs v1vault
 ```
-
-Docker
-List active containers and their IP addresses
-```
-docker ps -a --format "{{.Names}}" | xargs -I {} docker inspect --format "{{.Name}}    {{range .NetworkSettings.Networks}}br-{{slice .NetworkID 0 12}} {{.IPAddress}}{{end}}" {}
-```
-List all containers
-```
-docker ps -a
-```
-
-Execute Vault cli
-
-```
-export VAULT_TOKEN=
-export VAULT_ADDR=http://localhost:8200
-
-vault token lookup
-
-vault secrets list
-vault path-help kv/
-
-vault auth list
-```
