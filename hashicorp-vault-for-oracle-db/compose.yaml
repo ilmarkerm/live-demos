@@ -29,3 +29,15 @@ services:
         environment:
             - USER_NAME=oracle
             - LOG_STDOUT=true
+    postgres:
+        image: postgres:16.10
+        shm_size: 128mb
+        environment:
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_INITDB_ARGS="--data-checksums"
+        ports:
+            - 5432:5432
+        volumes:
+            - type: bind
+              source: postgres-init
+              target: /docker-entrypoint-initdb.d

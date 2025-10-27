@@ -1,26 +1,7 @@
+# Secure secrets management for Oracle Databases using HashiCorp Vault
 
-https://developer.hashicorp.com/vault/install
-https://developer.hashicorp.com/terraform/install
+Managing secrets efficiently and securely is essential, yet it remains a significant challenge for organizations. Poor practices in handling secrets can lead to unauthorized access, jeopardizing both the integrity of data and the security of the environment. In many Oracle database environments, secrets for third-party systems are often stored in tables or static files, and reliance on long-lasting passwords for database accounts is common due to the complexities of credential rotation and distribution of the secrets to all affected systems.
 
-```
-docker image pull hashicorp/vault
-docker image pull container-registry.oracle.com/database/free:latest-lite
-docker image pull oraclelinux:9
-docker image pull mysql:8.4-oraclelinux9
-```
+This session will provide an in-depth exploration of HashiCorp Vault - a widely adopted solution for secrets management that seamlessly integrates with Kubernetes and popular CI/CD tools, which many of your development teams may already utilize. We will examine the core components of Vault and demonstrate how it can be effectively implemented within typical Oracle database workflows. Participants will learn how to access secrets through PL/SQL and shell scripts, manage credentials for service and application accounts, automate TLS certificate handling, and even secure wallet passwords for Transparent Data Encryption (TDE).
 
-```
-docker run -p 8200:8200 --interactive --tty --mount src=/Users/ilmarkerm/live-demos,target=/live-demos,type=bind --name hashidemo-vault oraclelinux:9
-
-docker run --name hashidemo-oracle -p 1521:1521 -e ORACLE_PWD=Oracle123 --tty --mount src=/Users/ilmarkerm/live-demos,target=/live-demos,type=bind container-registry.oracle.com/database/free:latest
-
-docker run -it --name hashidemo-sshd -e USER_NAME=oracle -e LOG_STDOUT=true lscr.io/linuxserver/openssh-server:latest
-
-#docker run --interactive --tty --mount src=/Users/ilmarkerm/live-demos,target=/live-demos,type=bind --name hashidemo-linux oraclelinux:9
-
-
-docker start --interactive hashidemo-vault
-
-
-docker logs v1vault
-```
+2025 Ilmar Kerm; ilmar@ilmarkerm.eu; https://ilmarkerm.eu

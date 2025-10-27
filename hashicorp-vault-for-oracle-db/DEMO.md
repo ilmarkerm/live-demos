@@ -4,6 +4,12 @@ Ilmar Kerm 2025 ilmar@ilmarkerm.eu https://ilmarkerm.eu
 
 # Setup
 
+Startup
+```sh
+cd live-demos/hashicorp-vault-for-oracle-db
+docker compose up
+```
+
 Entrypoints:
 ```sh
 docker exec -it hashicorp-vault-for-oracle-db-oracle-1 bash
@@ -58,13 +64,11 @@ vault write -field=secret_id -f auth/approle/role/demo-proxy/secret-id
 
 database:
 ```sh
-cd /home/oracle/vault
-
 less /live-demos/hashicorp-vault-for-oracle-db/proxy_config.hcl
-echo "" > .roleid
-echo "" > .secretid
+echo "" > /home/oracle/vault/.roleid
+echo "" > /home/oracle/vault/.secretid
 # Start proxy
-vault proxy -config /live-demos/hashicorp-vault-for-oracle-db/proxy_config.hcl
+unset VAULT_ADDR ; vault proxy -config /live-demos/hashicorp-vault-for-oracle-db/proxy_config.hcl
 
 # NEW TAB
 # Do request via proxy and show the token
@@ -78,7 +82,7 @@ vault:
 clear
 vault secrets list
 
-vault secrets enable -path=demokv -description="Secrets for HROUG demo" -version=2 kv
+vault secrets enable -path=demokv -description="Secrets for DOAG demo" -version=2 kv
 vault secrets list
 
 # Write secret
@@ -144,7 +148,7 @@ select json_query(
     '$.data.data' returning json);
 ```
 
-# DEMO: Database accounts
+# DEMO: Database accounts ORACLE
 
 vault:
 Just show, do not perform.
@@ -195,49 +199,13 @@ GRANT SELECT on v_$sql to vault;
 GRANT ALTER SYSTEM to vault WITH ADMIN OPTION;
 ```
 
-vault (register oracle plugin):
+vault (show script contents):
+
 ```sh
-export VAULT_ADDR=http://127.0.0.1:8200
-unset VAULT_FORMAT
-
-clear
-sha256sum /root/vault-plugins/vault-plugin-database-oracle
-vault plugin register -sha256=3a59f4351f98c11d9d609744b76abd8b584c37a559441aed34544e84313933a3 database vault-plugin-database-oracle
-vault plugin list | grep oracle
-
-vault secrets enable database
-vault secrets list
-```
-
-vault (Create database connection):
-```sh
-vault write database/config/oracle \
-    plugin_name=vault-plugin-database-oracle \
-    allowed_roles="*" \
-    connection_url='{{username}}/{{password}}@//hashidemo-oracle:1521/freepdb1' \
-    username='vault' \
-    password='vault'
-
-# When "logon denied", reset vault password back to default
-alter user vault identified by vault;
-
-# Rotate root password immediately
-vault write -force database/rotate-root/oracle
+/live-demos/hashicorp-vault-for-oracle-db/demos/register_oracle_database.sh
 ```
 
 Show connection in GUI.
-
-vault (create database role for application "app1"):
-```sh
-# TTL - application would need to be restarted before it expires to fetch new credentials
-# Because on expiration Vault would kill sessions and drop the temporary user
-vault write database/roles/app1 \
-    db_name=oracle \
-    creation_statements='CREATE USER {{username}} IDENTIFIED BY "{{password}}"; GRANT CREATE SESSION TO {{username}}; ALTER USER app1 GRANT CONNECT THROUGH {{username}};' \
-    default_ttl="7d" \
-    max_ttl="10d"
-```
-
 Show role in GUI.
 
 database (fetch new database credential for "app1"):
@@ -250,6 +218,24 @@ vault read database/creds/app1
 SQL Developer (dba):
 ```sql
 select username from dba_users where oracle_maintained='N' and username like 'V%APP1%';
+```
+
+# DEMO: Database accounts POSTGRES
+
+vault (also show script):
+
+```sh
+/live-demos/hashicorp-vault-for-oracle-db/demos/register_postgres_database.sh
+```
+
+Show connection in GUI.
+Show role in GUI.
+
+Fetch credentials:
+
+```sh
+vault read database/creds/pgapp1
+vault read database/creds/pgapp1
 ```
 
 # DEMO: Agent
@@ -265,6 +251,13 @@ cat /tmp/agent_app1.config
 # DEMO: SSH certificate authority
 
 vault:
+
+```sh
+/live-demos/hashicorp-vault-for-oracle-db/demos/register_ssh_signer.sh
+```
+
+Same commands:
+
 ```sh
 clear
 vault secrets enable -path=ssh-client-signer ssh
@@ -289,25 +282,19 @@ vault write ssh-client-signer/roles/oracle -<<"EOH"
 EOH
 ```
 
-Spin up SSH server image:
-```sh
-docker run -it --name hashidemo-sshd -e USER_NAME=oracle -e LOG_STDOUT=true lscr.io/linuxserver/openssh-server:latest
-
-docker exec -it hashidemo-sshd bash
-```
-
 SSH server:
 ```sh
 curl -o /config/trusted-user-ca-keys.pem http://vault:8200/v1/ssh-client-signer/public_key
 cat /config/trusted-user-ca-keys.pem
 echo "TrustedUserCAKeys /config/trusted-user-ca-keys.pem" >> /config/sshd/sshd_config
 
-docker restart hashidemo-sshd
+docker restart hashicorp-vault-for-oracle-db-sshd-1
 ```
 
 database:
 ```sh
 clear
+ssh-keygen -t rsa
 cat /home/oracle/.ssh/id_rsa.pub
 
 # Demo the certificate output
@@ -321,7 +308,7 @@ ssh oracle@sshd -p 2222
 
 Show SSHD container logs to see that last login was done by certificate
 ```sh
-docker logs hashidemo-sshd
+docker logs hashicorp-vault-for-oracle-db-sshd-1
 ```
 
 # DEMO: secret wrapping
@@ -387,7 +374,7 @@ SELECT
 
 # Cleanup
 
-Database
+Database (not really needed, just in case needed between demos)
 
 ```sql
 alter session set container=freepdb1;
@@ -398,4 +385,9 @@ begin
     end loop;
 end;
 /
+```
+
+```sh
+cd live-demos/hashicorp-vault-for-oracle-db
+docker compose down
 ```
