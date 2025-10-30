@@ -9,8 +9,8 @@ vault write database/config/postgres \
     allowed_roles="*" \
     connection_url='postgresql://{{username}}:{{password}}@postgres:5432/postgres' \
     password_authentication="scram-sha-256" \
-    username='postgres' \
-    password='postgres'
+    username='vaultadmin' \
+    password='vaultadmin'
 
 sleep 5s
 
