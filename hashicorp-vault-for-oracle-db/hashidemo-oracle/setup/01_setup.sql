@@ -2,7 +2,7 @@ alter session set container=freepdb1;
 --create tablespace users datafile '/opt/oracle/oradata/FREE/FREEPDB1/users.dbf' size 100m autoextend on next 10m maxsize 1g;
 alter database default tablespace users;
 create user demo identified by demo quota unlimited on users;
-grant connect,resource,db_developer_role to demo;
+grant connect,resource,db_developer_role,select_catalog_role to demo;
 
 begin
     DBMS_NETWORK_ACL_ADMIN.APPEND_HOST_ACE(

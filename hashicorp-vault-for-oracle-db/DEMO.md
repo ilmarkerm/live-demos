@@ -4,6 +4,8 @@ Ilmar Kerm 2025 ilmar@ilmarkerm.eu https://ilmarkerm.eu
 
 # Setup
 
+VS Code change theme: ⌘K ⌘T
+
 Startup
 ```sh
 cd live-demos/hashicorp-vault-for-oracle-db
