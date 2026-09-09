@@ -43,6 +43,16 @@ Bluesky: @ilmarkerm.eu
 
 ---
 
+Add some slides what TLS is from the older presentation
+
+---
+
+Oracle uses separate port for TLS secured traffic, for example 1522
+
+PostgreSQL uses StartTLS that start with plain text, but switches to TLS on request - can accommodate plain text and TLS on same port
+
+---
+
 Oracle Native Encryption is no longer
 
 Mainly because TLS 1.3 is faster

@@ -18,6 +18,8 @@ services:
             - ORACLE_CHARACTERSET=AL32UTF8
             - ENABLE_ARCHIVELOG=false
             - ENABLE_FORCE_LOGGING=false
+        ports:
+            - 1522:1522
         volumes:
             - type: bind
               source: oracledb-scripts
