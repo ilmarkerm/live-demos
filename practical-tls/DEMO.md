@@ -40,3 +40,6 @@ ssl_ca_file = '/var/lib/postgresql/root.pem'
 /var/lib/postgresql/18/docker/pg_hba.conf
 # /var/lib/postgresql/18/docker/pg_ident.conf
 kill -SIGHUP 1
+
+
+Also show tests with psql and sqlplus programs
