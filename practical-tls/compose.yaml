@@ -1,0 +1,70 @@
+services:
+    vault:
+        container_name: vault
+        image: hashicorp/vault:1.21.4
+        ports:
+            - 8200:8200
+        environment:
+            # This is the most insecure option imaginable, but it is only a demo after all
+            - VAULT_DEV_ROOT_TOKEN_ID=demo123
+        networks:
+            - demo-net
+    oracledb:
+        container_name: oracledb
+        image: container-registry.oracle.com/database/free:latest
+        environment:
+            - ORACLE_PWD=demo123
+            - ORACLE_CHARACTERSET=AL32UTF8
+            - ENABLE_ARCHIVELOG=false
+            - ENABLE_FORCE_LOGGING=false
+        volumes:
+            - type: bind
+              source: oracledb-scripts
+              target: /home/oracle/scripts
+            - type: bind
+              source: oracledb-startup
+              target: /opt/oracle/scripts/startup
+            - oracledb_vol:/opt/oracle/oradata
+        networks:
+            - demo-net
+    postgres:
+        image: postgres:18.6
+        container_name: postgres
+        shm_size: 128mb
+        environment:
+            - POSTGRES_PASSWORD=postgres
+            - POSTGRES_INITDB_ARGS=--data-checksums --locale-provider=builtin --locale=C.UTF-8
+        ports:
+            - 5432:5432
+        volumes:
+            - type: bind
+              source: postgres-init
+              target: /docker-entrypoint-initdb.d
+            - postgres_vol:/var/lib/postgresql
+        networks:
+            - demo-net
+    controller:
+        container_name: controller
+        build:
+            context: controller/
+        volumes:
+            - type: bind
+              source: vault
+              target: /root/vault
+            - type: bind
+              source: controller-scripts
+              target: /root/scripts
+            # optional, just has some software packages
+            - type: bind
+              source: ../software
+              target: /root/software
+        networks:
+            - demo-net
+
+volumes:
+    oracledb_vol:
+    postgres_vol:
+
+networks:
+    demo-net:
+        driver: bridge

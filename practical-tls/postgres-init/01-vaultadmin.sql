@@ -1,0 +1,1 @@
+CREATE ROLE vaultadmin SUPERUSER LOGIN PASSWORD 'vaultadmin';
