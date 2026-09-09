@@ -6,4 +6,4 @@ Icon*
 .terraform
 .terraform.lock.hcl
 terraform.tfstate*
-
+.SynologyWorkingDirectory
