@@ -29,7 +29,8 @@ services:
         networks:
             - demo-net
     postgres:
-        image: postgres:18.6
+        build:
+            context: postgres/
         container_name: postgres
         shm_size: 128mb
         environment:
@@ -41,6 +42,9 @@ services:
             - type: bind
               source: postgres-init
               target: /docker-entrypoint-initdb.d
+            - type: bind
+              source: postgres-scripts
+              target: /scripts
             - postgres_vol:/var/lib/postgresql
         networks:
             - demo-net

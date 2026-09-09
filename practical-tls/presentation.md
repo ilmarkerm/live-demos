@@ -45,3 +45,13 @@ Blog: https://ilmarkerm.eu,
 Oracle Native Encryption is no longer
 
 Mainly because TLS 1.3 is faster
+
+---
+
+Vault has strong authentication mechanisms, like OIDC
+
+---
+
+When using user certificates it is possible to force Vault authenticated username to certificate.
+
+---
