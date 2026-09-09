@@ -1,5 +1,20 @@
-docker compose up
+# Author
 
+Ilmar Kerm
+ilmar@ilmarkerm.eu
+2026
+
+# Prerequisites
+
+Need modern Docker.
+
+# Running
+
+From the "practical-tls" directory (where compose.yaml is located), execute
+
+```
+docker compose up
+```
 
 After initial setup is done, Oracle DB needs a reboot to activate spfile parameters.
 

@@ -29,6 +29,7 @@ style: |
 
 # Practical Transport Layer Security TLS/SSL
 ## Ilmar Kerm
+### 2026
 
 ---
 
@@ -37,8 +38,8 @@ style: |
 Database administrator at FDJ United
 Oracle Ace Associate (ex-Pro)
 Member of Symposium 42
-Blog: https://ilmarkerm.eu,
-@ilmarkerm.eu
+Blog: https://ilmarkerm.eu
+Bluesky: @ilmarkerm.eu
 
 ---
 
@@ -68,3 +69,7 @@ chain validation errors
 ---
 
 postgres username must match certificate CN
+
+---
+
+![bg contain](img/qr-code.svg)
