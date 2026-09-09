@@ -55,3 +55,16 @@ Vault has strong authentication mechanisms, like OIDC
 When using user certificates it is possible to force Vault authenticated username to certificate.
 
 ---
+
+In postgres sslmode must at least be require to avoid falling back to plain text
+
+---
+
+Common errors
+
+hostname mismatch
+chain validation errors
+
+---
+
+postgres username must match certificate CN

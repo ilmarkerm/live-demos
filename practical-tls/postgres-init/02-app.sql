@@ -1,5 +1,9 @@
+CREATE ROLE dbcert_users;
+
 CREATE ROLE app1 WITH PASSWORD 'demo123' LOGIN;
 CREATE DATABASE app1 OWNER app1;
 
-CREATE ROLE demouser1 LOGIN;
+CREATE ROLE demouser1 LOGIN IN ROLE dbcert_users;
 CREATE DATABASE app2 OWNER demouser1;
+
+CREATE ROLE demouser2 LOGIN IN ROLE dbcert_users;
