@@ -11,7 +11,8 @@ services:
             - demo-net
     oracledb:
         container_name: oracledb
-        image: container-registry.oracle.com/database/free:latest
+        build:
+            context: oracledb/
         environment:
             - ORACLE_PWD=demo123
             - ORACLE_CHARACTERSET=AL32UTF8
