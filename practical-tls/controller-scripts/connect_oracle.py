@@ -25,10 +25,12 @@ db_password = os.environ.get("ORACLE_PASSWORD", "demo123")
 db_host = "oracledb.practical-tls_demo-net"
 
 def build_dsn() -> str:
-    return f"tcps://{args.hostname}:1522/FREEPDB1?SSL_SERVER_DN_MATCH={ 'OFF' if args.server_dn_match_off else 'ON' }"
+    dsn = f"tcps://{args.hostname}:1522/FREEPDB1?SSL_SERVER_DN_MATCH={ 'OFF' if args.server_dn_match_off else 'ON' }"
+    print(f"DSN: {dsn}")
+    return dsn
 
 
-def connect_oracledb_password(db_dsn:str, db_user:str, db_password:str) -> Connection:
+def connect_oracledb_password(db_user:str, db_password:str) -> Connection:
     # Create TLS context for encryption and certificate validation
     # This also allows to use system trusted issuers
     tls_ctx = create_default_context()
@@ -40,26 +42,26 @@ def connect_oracledb_password(db_dsn:str, db_user:str, db_password:str) -> Conne
     return connect(
         user = db_user,
         password = db_password,
-        dsn = db_dsn,
+        dsn = build_dsn(),
         ssl_context = tls_ctx,
     )
 
-def connect_oracledb_mlts(db_dsn:str, user_certfile:str, user_keyfile:str) -> Connection:
+def connect_oracledb_mlts(user_certfile:str, user_keyfile:str) -> Connection:
     # Create TLS context for encryption and certificate validation
     # This also allows to use system trusted issuers
-    tls_ctx = create_default_context()
-    tls_ctx.minimum_version = TLSVersion.TLSv1_2
-    tls_ctx.verify_mode = CERT_REQUIRED
-    tls_ctx.set_ciphers('HIGH')
-    tls_ctx.load_cert_chain(certfile=user_certfile, keyfile=user_keyfile)
+    #tls_ctx = create_default_context()
+    #tls_ctx.minimum_version = TLSVersion.TLSv1_2
+    #tls_ctx.verify_mode = CERT_REQUIRED
+    #tls_ctx.set_ciphers('HIGH')
+    #tls_ctx.load_cert_chain(certfile=user_certfile, keyfile=user_keyfile)
     #
     # Connect to the database using previously established TLS context
     return connect(
         user = "demouser1",
-        #password="",
+        password="abs",
         #password = db_password,
-        dsn = db_dsn,
-        ssl_context = tls_ctx,
+        dsn = build_dsn(),
+        wallet_location="/root/oracledb_thin_wallet",
         #externalauth=True,
     )
 
@@ -89,9 +91,9 @@ if __name__ == "__main__":
     args = parse_args()
     try:
         if args.mtls:
-            connection = connect_oracledb_mlts(dsn, "/root/user_cert.crt", "/root/user_cert.key")
+            connection = connect_oracledb_mlts("/root/user_cert.crt", "/root/user_cert.key")
         else:
-            connection = connect_oracledb_password(dsn, db_user, db_password)
+            connection = connect_oracledb_password(db_user, db_password)
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, message FROM hello_world ORDER BY id"
