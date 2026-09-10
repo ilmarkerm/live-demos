@@ -114,22 +114,34 @@ docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracl
 
 # PostgreSQL
 
-pg_hba:
-hostssl all +dbcert_users all cert
-hostssl all all all scram-sha-256
-
 ```
-ssl = on
-ssl_cert_file = '/var/lib/postgresql/server_cert.pem'
-ssl_key_file = '/var/lib/postgresql/server_cert.key'
-# For client verification
-ssl_ca_file = '/var/lib/postgresql/root.pem'
+docker compose exec postgres su - postgres -c "bash /scripts/vault_certs.sh"
+docker compose exec postgres su - postgres -c "cat /scripts/postgresql.conf >> /var/lib/postgresql/18/docker/postgresql.conf"
+docker compose exec postgres su - postgres -c "cat /scripts/pg_hba.conf >> /var/lib/postgresql/18/docker/pg_hba.conf"
 ```
 
-/var/lib/postgresql/18/docker/postgresql.conf
-/var/lib/postgresql/18/docker/pg_hba.conf
-# /var/lib/postgresql/18/docker/pg_ident.conf
-kill -SIGHUP 1
+Reload config (or rotate certificates) - send SIGHUP to postmaster or patroni - in docker image pid=1
+
+```
+docker compose exec postgres kill -SIGHUP 1
+```
+
+Test with OpenSSL
+
+```
+echo -n | openssl s_client -connect localhost:5432 -starttls postgres -showcerts
+```
+
+Login to shell
+
+```
+docker compose exec postgres su - postgres -c bash
+```
+
+# PostgreSQL client tests
+
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_postgres.py
+
 
 
 Also show tests with psql and sqlplus programs

@@ -21,7 +21,12 @@ db_user = os.environ.get("ORACLE_USER", "demo")
 db_password = os.environ.get("ORACLE_PASSWORD", "demo123")
 
 # TCPS (TLS) Easy Connect string
-dsn = "tcps://oracledb.practical-tls_demo-net:1522/FREEPDB1"
+#dsn = "tcps://oracledb.practical-tls_demo-net:1522/FREEPDB1"
+db_host = "oracledb.practical-tls_demo-net"
+
+def build_dsn() -> str:
+    return f"tcps://{args.hostname}:1522/FREEPDB1?SSL_SERVER_DN_MATCH={ 'OFF' if args.server_dn_match_off else 'ON' }"
+
 
 def connect_oracledb_password(db_dsn:str, db_user:str, db_password:str) -> Connection:
     # Create TLS context for encryption and certificate validation
@@ -51,7 +56,7 @@ def connect_oracledb_mlts(db_dsn:str, user_certfile:str, user_keyfile:str) -> Co
     # Connect to the database using previously established TLS context
     return connect(
         user = "demouser1",
-        password="",
+        #password="",
         #password = db_password,
         dsn = db_dsn,
         ssl_context = tls_ctx,
@@ -67,6 +72,16 @@ def parse_args():
         "--mtls",
         action="store_true",
         help="Enable mutual TLS (mTLS) by presenting a client certificate/key.",
+    )
+    parser.add_argument(
+        "--server-dn-match-off",
+        action="store_true",
+        help="Disable strict hostname checking.",
+    )
+    parser.add_argument(
+        "--hostname",
+        default=db_host,
+        help=f"Database hostname to use. Useful for demonstrating hostname mismatch. Default: {db_host}.",
     )
     return parser.parse_args()
 

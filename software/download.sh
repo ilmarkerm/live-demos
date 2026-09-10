@@ -23,6 +23,9 @@ fn="vault_${vers}_linux_arm64.zip"
 fn="vault_${vers}_darwin_arm64.zip"
 [ -f "$fn" ] || curl -o "$fn" "https://releases.hashicorp.com/vault/${vers}/${fn}"
 
+# sqlcl
+curl -o sqlcl-latest.zip https://download.oracle.com/otn_software/java/sqldeveloper/sqlcl-latest.zip
+
 /Users/ilmarkerm/live-demos/software/instantclient-basic-linux.arm64-19.28.0.0.0dbru.zip
 /Users/ilmarkerm/live-demos/software/instantclient-sdk-linux.arm64-19.28.0.0.0dbru.zip
 /Users/ilmarkerm/live-demos/software/oracle-instantclient19.28-basic-19.28.0.0.0-1.el9.aarch64.rpm

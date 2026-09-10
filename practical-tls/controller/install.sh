@@ -6,7 +6,7 @@ testroot=/root
 venvpath="${testroot}/venv_test"
 python3.12 -m venv "$venvpath"
 "${venvpath}/bin/pip" install --upgrade pip
-"${venvpath}/bin/pip" install psycopg[binary] oracledb
+"${venvpath}/bin/pip" install psycopg[binary] oracledb cryptography
 
 # Install some useful packages and java
 dnf install yum-utils netcat jq oracle-instantclient-release-26ai-el9
