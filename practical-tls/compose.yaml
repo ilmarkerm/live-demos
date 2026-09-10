@@ -23,7 +23,7 @@ services:
         volumes:
             - type: bind
               source: oracledb-scripts
-              target: /home/oracle/scripts
+              target: /scripts
             - type: bind
               source: oracledb-startup
               target: /opt/oracle/scripts/startup
@@ -60,7 +60,7 @@ services:
               target: /root/vault
             - type: bind
               source: controller-scripts
-              target: /root/scripts
+              target: /scripts
             # optional, just has some software packages
             - type: bind
               source: ../software

@@ -67,7 +67,25 @@ When using user certificates it is possible to force Vault authenticated usernam
 
 ---
 
+What information is present in a certificate
+
+
+
+---
+
+Revocations
+
+Why short validity is better than dealing with recovations
+
+---
+
 In postgres sslmode must at least be require to avoid falling back to plain text
+
+PostgreSQL sslmode values
+disable
+prefer
+require
+validate-full
 
 ---
 
@@ -79,6 +97,16 @@ chain validation errors
 ---
 
 postgres username must match certificate CN
+
+---
+
+# Renewals
+
+Generate new certificate, and...
+
+* In Postgres just send SIGHUP signal to postmaster
+* If you use Patroni, send SIGHUP to Patroni process instead
+* In Oracle, restart listener
 
 ---
 

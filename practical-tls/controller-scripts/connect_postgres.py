@@ -4,11 +4,9 @@ Connect to PostgreSQL over TLS using the psycopg (v3) driver and list all
 rows from the hello_world table.
 """
 
-import os
 import sys
 
 import psycopg
-from psycopg import Connection
 
 # --- Connection settings -----------------------------------------------
 db_host = "postgres.practical-tls_demo-net"
@@ -22,7 +20,7 @@ root_cert = "/etc/pki/ca-trust/source/anchors/vault_demo_root.pem"
 
 def connect_postgres_password(
     host: str, port: str, dbname: str, user: str, password: str
-) -> Connection:
+) -> psycopg.Connection:
     # sslmode=verify-full validates the server certificate against the CA
     # and confirms the certificate's hostname matches the host we connect to.
     return psycopg.connect(
@@ -44,7 +42,7 @@ def connect_postgres_mtls(
     user: str,
     sslcert: str,
     sslkey: str,
-) -> Connection:
+) -> psycopg.Connection:
     # With mTLS the client certificate itself authenticates the connection,
     # so no password is required (the server maps the certificate's CN to
     # a database role via clientcert/cert auth in pg_hba.conf).
@@ -79,6 +77,16 @@ def parse_args():
         "--password",
         help="Database user password, if mTLS is not used.",
     )
+    parser.add_argument(
+        "--hostname",
+        default=db_host,
+        help=f"Database hostname to use. Useful for demonstrating hostname mismatch. Default: {db_host}.",
+    )
+    parser.add_argument(
+        "--sslmode",
+        default="verify-full",
+        help="SSLMODE. Default: verify-full.",
+    )
     return parser.parse_args()
 
 
@@ -87,7 +95,7 @@ if __name__ == "__main__":
     try:
         if args.mtls:
             connection = connect_postgres_mtls(
-                db_host,
+                args.hostname,
                 db_port,
                 db_name,
                 args.username,
@@ -96,7 +104,7 @@ if __name__ == "__main__":
             )
         else:
             connection = connect_postgres_password(
-                db_host, db_port, db_name, args.username, args.password
+                args.hostname, db_port, db_name, args.username, args.password
             )
 
         print("Database connection successful, now trying a query")

@@ -13,6 +13,8 @@ import sys
 
 import oracledb
 
+# oracledb.init_oracle_client()
+
 # --- Connection settings -----------------------------------------------
 # Credentials: override via environment variables, or hardcode for a demo.
 db_user = os.environ.get("ORACLE_USER", "demo")
