@@ -1,3 +1,3 @@
 terraform {
-  backend "local" { path = "/root/vault_terraform/terraform.tfstate" }
+  #backend "local" { path = "/root/vault_terraform/terraform.tfstate" }
 }

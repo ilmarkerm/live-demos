@@ -94,6 +94,10 @@ Common errors
 hostname mismatch
 chain validation errors
 
+10-SEP-2026 17:25:19:778 * (ADDRESS=(PROTOCOL=tcps)(HOST=172.19.0.5)(PORT=48784)) * <unknown connect data> * 29024
+ORA-29024: Certificate validation failure
+ TNS-00542: SSL Handshake failed
+
 ---
 
 postgres username must match certificate CN

@@ -10,6 +10,11 @@ cp /scripts/listener.ora /opt/oracle/product/26ai/dbhomeFree/network/admin/liste
 
 echo "Restarting the listener... reload is not enough"
 lsnrctl stop && lsnrctl start
+
+sqlplus / as sysdba<<EOF
+alter system register;
+EOF
+
 lsnrctl status
 
 sleep 5s

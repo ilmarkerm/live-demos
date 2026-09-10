@@ -59,6 +59,9 @@ services:
               source: vault
               target: /root/vault
             - type: bind
+              source: oracledb-scripts/client_wallet
+              target: /root/client_wallet
+            - type: bind
               source: controller-scripts
               target: /scripts
             # optional, just has some software packages

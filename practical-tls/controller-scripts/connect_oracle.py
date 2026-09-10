@@ -57,8 +57,8 @@ def connect_oracledb_mlts(user_certfile:str, user_keyfile:str) -> Connection:
     #
     # Connect to the database using previously established TLS context
     return connect(
-        user = "demouser1",
-        password="abs",
+        user = "demo",
+        password="demo123",
         #password = db_password,
         dsn = build_dsn(),
         wallet_location="/root/oracledb_thin_wallet",

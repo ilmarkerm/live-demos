@@ -56,7 +56,7 @@ docker compose exec controller bash /scripts/vault_setup.sh destroy
 First lets create Oracle Wallet and request certificate from Vault
 
 ```
-docker compose exec oracledb bash /scripts/wallet_create.sh
+  docker compose exec oracledb bash /scripts/wallet_create.sh
 ```
 
 Oracle network connections are taken by listener first, so listener needs to be set up for TLS.
@@ -110,6 +110,38 @@ With recent Oralce Instantclient (>21?) it can use OS system trust store and no 
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle_thick.py
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle_thick.py --hostname oracledb
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle_thick.py --hostname oracledb --server-dn-match-off
+```
+
+DN matching:
+PARTIAL - SSL_SERVER_DN_MATCH=ON - only hostname is checked
+
+FULL - the entire DN is checked against written value
+finance=
+(DESCRIPTION=
+(ADDRESS_LIST=
+(ADDRESS= (PROTOCOL = tcps) (HOST = finance) (PORT = 1575)))
+(CONNECT_DATA=
+(SERVICE_NAME= finance.us.example.com))
+(SECURITY=
+(SSL_SERVER_CERT_DN="cn=finance,cn=OracleContext,c=us,o=example"))
+
+
+## mTLS
+
+Prepare the user wallet
+
+```
+docker compose exec controller bash /scripts/vault_user.sh
+```
+
+This driver does support mTLS, but not for authentication.
+Turn SSL_CLIENT_AUTHENTICATION to TRUE in listener.ora and sqlnet.ora to demonstrate that mTLS is forced then.
+
+```
+# This is successful
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle.py --mtls
+# This should fail
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle.py
 ```
 
 # PostgreSQL
