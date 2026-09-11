@@ -38,6 +38,7 @@ NB! Everything with Vault is set up for demo purposes only using a root token an
 # Create Vault structure
 
 ```
+docker compose exec controller bash /scripts/vault_setup.sh destroy
 docker compose exec controller bash /scripts/vault_setup.sh
 ```
 
@@ -56,7 +57,7 @@ docker compose exec controller bash /scripts/vault_setup.sh destroy
 First lets create Oracle Wallet and request certificate from Vault
 
 ```
-  docker compose exec oracledb bash /scripts/wallet_create.sh
+docker compose exec oracledb bash /scripts/wallet_create.sh
 ```
 
 Oracle network connections are taken by listener first, so listener needs to be set up for TLS.
@@ -124,7 +125,7 @@ finance=
 (SERVICE_NAME= finance.us.example.com))
 (SECURITY=
 (SSL_SERVER_CERT_DN="cn=finance,cn=OracleContext,c=us,o=example"))
-
+)
 
 ## mTLS
 
@@ -143,6 +144,35 @@ docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracl
 # This should fail
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle.py
 ```
+
+## PKI Certificate authentication
+
+Show how demouser1 is created in oracledb-startup/
+
+Create a user wallet file
+
+```
+docker compose exec oracledb bash /scripts/wallet_client.sh
+```
+
+Test with sqlplus
+
+```
+docker compose exec controller bash
+export TNS_ADMIN=/scripts/tns_admin
+cat $TNS_ADMIN/sqlnet.ora
+cat $TNS_ADMIN/tnsnames.ora
+
+sqlplus /@oracledb
+```
+
+With Python
+but it only works in thick mode
+
+```
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle_thick.py --mtls
+```
+
 
 # PostgreSQL
 

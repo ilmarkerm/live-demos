@@ -1,0 +1,8 @@
+oracledb =
+    (DESCRIPTION=
+        (ADDRESS_LIST=
+            (ADDRESS= (PROTOCOL = tcps) (HOST = oracledb.practical-tls_demo-net) (PORT = 1522))
+        )
+        (CONNECT_DATA=
+            (SERVICE_NAME = FREEPDB1))
+    )

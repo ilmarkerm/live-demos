@@ -43,7 +43,70 @@ Bluesky: @ilmarkerm.eu
 
 ---
 
-Add some slides what TLS is from the older presentation
+# SSL vs TLS
+
+- SSL -Secure Sockets Layer
+- TLS - Transport Layer Security
+
+---
+
+# SSL vs TLS
+
+- Netscape started to develop SSL in 1994
+- SSL v3.0 (1996) was widely adopted
+- IETF took over the standardisation of the protocol and published TLS 1.0 in 1999.
+  - SSL is now deprecated.
+- TLS 1.3 is the current standard. TLS 1.2 is also supported.
+- TLS 1.1 and 1.0 are deprecated.
+
+---
+
+# The problem
+
+We want to enable end-to-end secure communication for our application
+Securing data in transit
+
+---
+
+# TLS
+
+Works directly on TCP
+Can secure any TCP based protocol
+Provides:
+- Confidentiality
+- Integrity
+- Authenticity
+
+---
+
+# Authenticity
+
+Need to make sure that every party is who they say they are
+Avoid man-in-the-middle attacks
+Requires PKI and signed certificates
+- Each communicating party needs to know each others public keys
+
+---
+
+# Certificates
+
+Public key signed by an Certification Authority
+- or by itself - self signed
+Avoid self-signed certificates for real use
+- Hard to issue new certs, revoke existing ones
+
+---
+
+# Creating a certificate process
+
+copy image
+
+---
+
+# Validity concerns
+
+Use as short certificates as possible.
+Revocations are annoying.
 
 ---
 

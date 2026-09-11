@@ -10,6 +10,7 @@ import sys
 import oracledb
 
 # Initialises the thick client
+os.environ["TNS_ADMIN"] = "/scripts/tns_admin"
 oracledb.init_oracle_client()
 
 # --- Connection settings -----------------------------------------------
@@ -19,7 +20,7 @@ db_password = os.environ.get("ORACLE_PASSWORD", "demo123")
 db_host = "oracledb.practical-tls_demo-net"
 
 def build_dsn() -> str:
-    return f"tcps://{args.hostname}:1522/FREEPDB1?SSL_SERVER_DN_MATCH={ 'OFF' if args.server_dn_match_off else 'ON' }"
+    return f"tcps://{args.hostname}:1522/FREEPDB1?SSL_SERVER_DN_MATCH={ 'OFF' if args.server_dn_match_off else 'ON' }{ '&AUTHENTICATION_SERVICE=tcps' if args.mtls else '' }"
 
 def connect_oracledb_password(db_user:str, db_password:str) -> oracledb.Connection:
     # Connect to the database using previously established TLS context
@@ -29,6 +30,16 @@ def connect_oracledb_password(db_user:str, db_password:str) -> oracledb.Connecti
         user = db_user,
         password = db_password,
         dsn = connect_dsn,
+    )
+
+def connect_oracledb_mtls() -> oracledb.Connection:
+    # Connect to the database using previously established TLS context
+    connect_dsn = build_dsn()
+    print(f"DSN: {connect_dsn}")
+    #connect_dsn = "oracledb"
+    return oracledb.connect(
+        dsn = connect_dsn,
+        externalauth=True,
     )
 
 def parse_args():
@@ -56,7 +67,10 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     try:
-        connection = connect_oracledb_password(db_user, db_password)
+        if args.mtls:
+            connection = connect_oracledb_mtls()
+        else:
+            connection = connect_oracledb_password(db_user, db_password)
         with connection.cursor() as cursor:
             cursor.execute(
                 "SELECT id, message FROM hello_world ORDER BY id"

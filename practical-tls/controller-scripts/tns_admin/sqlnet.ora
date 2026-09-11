@@ -1,0 +1,13 @@
+# Enable TLS certificate authentication
+TLS_CLIENT_AUTHENTICATION=TRUE
+
+# Check server hostname matches server certificate
+TLS_SERVER_DN_MATCH=TRUE
+
+WALLET_LOCATION =
+  (SOURCE =
+    (METHOD = FILE)
+    (METHOD_DATA =
+      (DIRECTORY = /root/client_wallet)
+    )
+  )
