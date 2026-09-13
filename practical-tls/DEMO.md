@@ -1,4 +1,6 @@
-# Author
+# Practical Transport Layer Security
+
+## Author
 
 Ilmar Kerm
 ilmar@ilmarkerm.eu
@@ -11,6 +13,7 @@ Need modern Docker.
 # Secrets
 
 All passwords are: demo123
+
 Vault root token is: demo123
 
 # Running
@@ -60,19 +63,29 @@ docker compose exec oracledb bash /scripts/wallet_create.sh
 
 Wallet was created under /home/oracle/wallet_root
 
+## Listener
+
 Oracle network connections are taken by listener first, so listener needs to be set up for TLS.
+
+Lookig at current listener configuration. No TLS set up initially.
 
 ```
 docker compose exec oracledb lsnrctl status
-docker compose exec oracledb cat /opt/oracle/product/26ai/dbhomeFree/network/admin/listener.ora
+```
+
+And configure the listener for TLS.
+
+```
 docker compose exec oracledb bash /scripts/configure_listener.sh
 ```
 
 Verify that listener responds to TLS correcly
 
 ```
-echo -n | openssl s_client -connect localhost:1522 -showcerts
+echo -n | openssl s_client -connect localhost:1522 -showcerts | less
 ```
+
+## Configure database for TLS
 
 But also how Oracle architecture is set up, configuring TLS on listener is not enough, listener hands over the connection to database, TLS also needs to be configured in database.
 
@@ -100,21 +113,31 @@ Download the root certificate from Vault and place it under client system trusts
 docker compose exec controller bash /scripts/trust_vault_root.sh
 ```
 
-Connect from python thin driver
+## Connect from python thin driver
 
 ```
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle.py
 ```
 
-Connect from python thick driver
+## Connect from python thick driver
 
 With recent Oralce Instantclient (>21?) it can use OS system trust store and no need to confiugure Oracle Wallet on client side.
 
-NB! Need to disable TNS_ADMIN first for this test!
+Using the default hostname, which is present in the certificate.
 
 ```
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle_thick.py
+```
+
+Using alternate hostname, that is not in certificate, this will fail.
+
+```
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle_thick.py --hostname oracledb
+```
+
+Using alternate hostname, but turning the hostname checking off. This should succeed.
+
+```
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle_thick.py --hostname oracledb --server-dn-match-off
 ```
 
@@ -122,6 +145,7 @@ DN matching:
 PARTIAL - SSL_SERVER_DN_MATCH=ON - only hostname is checked
 
 FULL - the entire DN is checked against written value
+```
 finance=
 (DESCRIPTION=
 (ADDRESS_LIST=
@@ -131,6 +155,7 @@ finance=
 (SECURITY=
 (SSL_SERVER_CERT_DN="cn=finance,cn=OracleContext,c=us,o=example"))
 )
+```
 
 ## mTLS
 
@@ -143,7 +168,7 @@ docker compose exec controller bash /scripts/vault_user.sh
 ```
 
 This driver does support mTLS, but not for authentication.
-Turn SSL_CLIENT_AUTHENTICATION to TRUE in listener.ora and sqlnet.ora to demonstrate that mTLS is forced then.
+Turn TLS_CLIENT_AUTHENTICATION to TRUE in listener.ora and sqlnet.ora to demonstrate that mTLS is forced then.
 
 ```
 # This is successful
@@ -183,10 +208,22 @@ docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracl
 
 # PostgreSQL
 
+Create server certificates
+
 ```
 docker compose exec postgres su - postgres -c "bash /scripts/vault_certs.sh"
-docker compose exec postgres su - postgres -c "cat /scripts/postgresql.conf >> /var/lib/postgresql/18/docker/postgresql.conf"
-docker compose exec postgres su - postgres -c "cat /scripts/pg_hba.conf >> /var/lib/postgresql/18/docker/pg_hba.conf"
+```
+
+Configure TLS in postgres
+
+```
+docker compose exec postgres su - postgres -c "cat /scripts/postgresql.conf ; cat /scripts/postgresql.conf >> /var/lib/postgresql/18/docker/postgresql.conf"
+```
+
+Allow TLS for clients
+
+```
+docker compose exec postgres su - postgres -c "cat /scripts/pg_hba.conf ; cat /scripts/pg_hba.conf > /var/lib/postgresql/18/docker/pg_hba.conf"
 ```
 
 Reload config (or rotate certificates) - send SIGHUP to postmaster or patroni - in docker image pid=1
@@ -194,6 +231,8 @@ Reload config (or rotate certificates) - send SIGHUP to postmaster or patroni - 
 ```
 docker compose exec postgres kill -SIGHUP 1
 ```
+
+Show how users and databases are created in postgres-init/02-app.sql
 
 Test with OpenSSL
 
@@ -209,13 +248,37 @@ docker compose exec postgres su - postgres -c bash
 
 # PostgreSQL client tests
 
-docker compose exec controller /root/venv_test/bin/python /scripts/connect_postgres.py
+One way TLS, with password authentication
 
+```
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_postgres.py app1 --password demo123
+```
 
+Testing with short hostname, that is not part of certificate and sslmode=verify-full
 
-Also show tests with psql and sqlplus programs
+```
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_postgres.py app1 --password demo123 --hostname postgres --sslmode=verify-full
+```
 
+Short hostname with sslmode=require works.
 
+```
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_postgres.py app1 --password demo123 --hostname postgres --sslmode=require
+```
+
+## mTLS
+
+Need to use demouser1 as username, because in pg_hba this user is configured with "cert" authentication.
+
+```
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_postgres.py demouser1 --mtls
+```
+
+Can show, that any password value is accepted. Or just remove password.
+
+```
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_postgres.py demouser1 --mtls --password WhatEva
+```
 
 # Download
 

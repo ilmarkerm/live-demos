@@ -17,45 +17,15 @@ db_name = "app1"
 # It is in system store, but somehow didn't get system store to work here
 root_cert = "/etc/pki/ca-trust/source/anchors/vault_demo_root.pem"
 
-
-def connect_postgres_password(
-    host: str, port: str, dbname: str, user: str, password: str
-) -> psycopg.Connection:
-    # sslmode=verify-full validates the server certificate against the CA
-    # and confirms the certificate's hostname matches the host we connect to.
-    return psycopg.connect(
-        host=host,
-        port=port,
-        dbname=dbname,
-        user=user,
-        password=password,
-        sslmode="verify-full",
-        # sslrootcert="system" should work, but can't get it to work right now
-        sslrootcert=root_cert,
-    )
-
-
-def connect_postgres_mtls(
-    host: str,
-    port: str,
-    dbname: str,
-    user: str,
-    sslcert: str,
-    sslkey: str,
-) -> psycopg.Connection:
-    # With mTLS the client certificate itself authenticates the connection,
-    # so no password is required (the server maps the certificate's CN to
-    # a database role via clientcert/cert auth in pg_hba.conf).
-    return psycopg.connect(
-        host=host,
-        port=port,
-        user=user,
-        dbname=dbname,
-        sslmode="verify-full",
-        sslrootcert=root_cert,
-        sslcert=sslcert,
-        sslkey=sslkey,
-    )
+def build_dsn() -> str:
+    from urllib.parse import quote
+    dsn = f"host={args.hostname} port={db_port} dbname={db_name} sslmode={args.sslmode} sslrootcert={root_cert} user={args.username}"
+    if args.password:
+        dsn += f" password={quote(args.password, safe='')}"
+    if args.mtls:
+        dsn += " sslcert=/root/user_cert.crt sslkey=/root/user_cert.key"
+    print(f"\n\nDSN: {dsn}\n\n")
+    return dsn
 
 
 def parse_args():
@@ -93,21 +63,9 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     try:
-        if args.mtls:
-            connection = connect_postgres_mtls(
-                args.hostname,
-                db_port,
-                db_name,
-                args.username,
-                "/root/user_cert.crt",
-                "/root/user_cert.key",
-            )
-        else:
-            connection = connect_postgres_password(
-                args.hostname, db_port, db_name, args.username, args.password
-            )
+        connection = psycopg.connect(build_dsn())
 
-        print("Database connection successful, now trying a query")
+        print("\n\nDatabase connection successful, now trying a query")
         with connection.cursor() as cursor:
             cursor.execute("SELECT session_user, current_user")
             rows = cursor.fetchall()

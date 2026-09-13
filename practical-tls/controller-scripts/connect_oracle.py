@@ -26,7 +26,7 @@ db_host = "oracledb.practical-tls_demo-net"
 
 def build_dsn() -> str:
     dsn = f"tcps://{args.hostname}:1522/FREEPDB1?SSL_SERVER_DN_MATCH={ 'OFF' if args.server_dn_match_off else 'ON' }"
-    print(f"DSN: {dsn}")
+    print(f"\n\nDSN: {dsn}\n\n")
     return dsn
 
 

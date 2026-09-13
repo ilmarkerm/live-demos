@@ -9,10 +9,6 @@ import sys
 
 import oracledb
 
-# Initialises the thick client
-os.environ["TNS_ADMIN"] = "/scripts/tns_admin"
-oracledb.init_oracle_client()
-
 # --- Connection settings -----------------------------------------------
 # Credentials: override via environment variables, or hardcode for a demo.
 db_user = os.environ.get("ORACLE_USER", "demo")
@@ -20,12 +16,14 @@ db_password = os.environ.get("ORACLE_PASSWORD", "demo123")
 db_host = "oracledb.practical-tls_demo-net"
 
 def build_dsn() -> str:
-    return f"tcps://{args.hostname}:1522/FREEPDB1?SSL_SERVER_DN_MATCH={ 'OFF' if args.server_dn_match_off else 'ON' }{ '&AUTHENTICATION_SERVICE=tcps' if args.mtls else '' }"
+    d = f"tcps://{args.hostname}:1522/FREEPDB1?SSL_SERVER_DN_MATCH={ 'OFF' if args.server_dn_match_off else 'ON' }{ '&AUTHENTICATION_SERVICE=tcps' if args.mtls else '' }"
+    print(f"\n\nDSN: {d}\n\n")
+    return d
 
 def connect_oracledb_password(db_user:str, db_password:str) -> oracledb.Connection:
     # Connect to the database using previously established TLS context
     connect_dsn = build_dsn()
-    print(f"DSN: {connect_dsn}")
+    oracledb.init_oracle_client()
     return oracledb.connect(
         user = db_user,
         password = db_password,
@@ -35,8 +33,9 @@ def connect_oracledb_password(db_user:str, db_password:str) -> oracledb.Connecti
 def connect_oracledb_mtls() -> oracledb.Connection:
     # Connect to the database using previously established TLS context
     connect_dsn = build_dsn()
-    print(f"DSN: {connect_dsn}")
     #connect_dsn = "oracledb"
+    os.environ["TNS_ADMIN"] = "/scripts/tns_admin"
+    oracledb.init_oracle_client()
     return oracledb.connect(
         dsn = connect_dsn,
         externalauth=True,
