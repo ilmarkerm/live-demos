@@ -275,6 +275,12 @@ docker compose exec controller /root/venv_test/bin/python /scripts/connect_postg
 
 ## mTLS
 
+If client certificates for Oracle tests were not created earlier, then do it now.
+
+```
+docker compose exec controller bash /scripts/vault_user.sh
+```
+
 Need to use demouser1 as username, because in pg_hba this user is configured with "cert" authentication.
 
 ```
