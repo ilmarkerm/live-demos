@@ -40,8 +40,15 @@ NB! Everything with Vault is set up for demo purposes only using a root token an
 
 # Create Vault structure
 
+First destroy, since the the terraform state is written to a persistent docker volume. If it fails, no problem.
+
 ```
 docker compose exec controller bash /scripts/vault_setup.sh destroy
+```
+
+And create
+
+```
 docker compose exec controller bash /scripts/vault_setup.sh
 ```
 
