@@ -46,11 +46,9 @@ Go to [Vault GUI](http://localhost:8200/) and show the Vault structures created.
 
 ![Certification chain](img/certification_chain.png)
 
-DEBUG: If Vault container is restarted or recreated during the test, then have to run destory first before recreating Vault setup. Because in dev mode Vault does not persist anything, but terraform state file remains in place on controller.
+# One-way TLS
 
-```
-docker compose exec controller bash /scripts/vault_setup.sh destroy
-```
+![Certification chain](img/one-way-tls.png)
 
 # OracleDB server configuration
 
@@ -59,6 +57,8 @@ First lets create Oracle Wallet and request certificate from Vault
 ```
 docker compose exec oracledb bash /scripts/wallet_create.sh
 ```
+
+Wallet was created under /home/oracle/wallet_root
 
 Oracle network connections are taken by listener first, so listener needs to be set up for TLS.
 
@@ -89,6 +89,9 @@ Show sqlnet.ora
 docker compose exec oracledb cat /opt/oracle/product/26ai/dbhomeFree/network/admin/sqlnet.ora
 ```
 
+NB! TLS_CLIENT_AUTHENTICATION = OPTIONAL
+Because it is by default TRUE, meaning mTLS is always enabled.
+
 # OracleDB client tests
 
 Download the root certificate from Vault and place it under client system truststore.
@@ -106,6 +109,8 @@ docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracl
 Connect from python thick driver
 
 With recent Oralce Instantclient (>21?) it can use OS system trust store and no need to confiugure Oracle Wallet on client side.
+
+NB! Need to disable TNS_ADMIN first for this test!
 
 ```
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle_thick.py
@@ -128,6 +133,8 @@ finance=
 )
 
 ## mTLS
+
+![Certification chain](img/mutual-tls.png)
 
 Prepare the user wallet
 
