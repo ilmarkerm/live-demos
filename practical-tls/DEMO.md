@@ -177,12 +177,28 @@ docker compose exec controller bash /scripts/vault_user.sh
 This driver does support mTLS, but not for authentication.
 Turn TLS_CLIENT_AUTHENTICATION to TRUE in listener.ora and sqlnet.ora to demonstrate that mTLS is forced then.
 
+Edit sqlnet.ora to set TLS_CLIENT_AUTHENTICATION temporarily to TRUE.
+
 ```
-# This is successful
-docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle.py --mtls
-# This should fail
+docker compose exec oracledb vi /opt/oracle/product/26ai/dbhomeFree/network/admin/sqlnet.ora
+```
+
+This should fail
+
+```
 docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle.py
 ```
+
+Show the "Certificate validation failure" in database alert log, from the docker log console.
+
+And now send the client certificate also.
+This is successful
+
+```
+docker compose exec controller /root/venv_test/bin/python /scripts/connect_oracle.py --mtls
+```
+
+Open sqlnet.ora again and change TLS_CLIENT_AUTHENTICATION back to OPTIONAL
 
 ## PKI Certificate authentication
 
