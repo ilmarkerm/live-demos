@@ -1,7 +1,7 @@
 ARG arch=arm64
 FROM oraclelinux:9
-ARG vaultversion=1.20.4
-ARG terraformversion=1.13.4
+ARG vaultversion=1.21.4
+ARG terraformversion=1.14.9
 ARG goversion=1.25.3
 ARG arch
 ARG oraclearch=aarch64

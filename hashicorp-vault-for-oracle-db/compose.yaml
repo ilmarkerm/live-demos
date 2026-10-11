@@ -30,7 +30,7 @@ services:
             - USER_NAME=oracle
             - LOG_STDOUT=true
     postgres:
-        image: postgres:16.10
+        image: postgres:16.15
         shm_size: 128mb
         environment:
             - POSTGRES_PASSWORD=postgres
