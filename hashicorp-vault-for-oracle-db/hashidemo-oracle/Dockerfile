@@ -1,6 +1,6 @@
 ARG arch=arm64
 FROM container-registry.oracle.com/database/free:23.9.0.0-${arch}
-ARG vaultversion=1.20.4
+ARG vaultversion=1.21.4
 ARG arch
 SHELL ["/bin/bash","-c"]
 RUN su -c "echo '' > /etc/dnf/vars/ociregion"

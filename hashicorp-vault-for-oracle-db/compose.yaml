@@ -14,6 +14,9 @@ services:
             - type: bind
               source: .
               target: /live-demos/hashicorp-vault-for-oracle-db
+            - oracledb_vol:/opt/oracle/oradata
+        networks:
+            - hashidemo-net
     vault:
         image: hashidemo-vault_v2
         build:
@@ -24,11 +27,15 @@ services:
             - type: bind
               source: .
               target: /live-demos/hashicorp-vault-for-oracle-db
+        networks:
+            - hashidemo-net
     sshd:
         image: lscr.io/linuxserver/openssh-server:latest
         environment:
             - USER_NAME=oracle
             - LOG_STDOUT=true
+        networks:
+            - hashidemo-net
     postgres:
         image: postgres:16.15
         shm_size: 128mb
@@ -41,3 +48,30 @@ services:
             - type: bind
               source: postgres-init
               target: /docker-entrypoint-initdb.d
+            - postgres_vol:/var/lib/postgresql
+        networks:
+            - hashidemo-net
+#     cryptsetup:
+#         image: hashidemo-cryptsetup
+#         build:
+#             context: hashidemo-cryptsetup/
+#         volumes:
+#             - encrypted:/encrypted
+#             - type: bind
+#               source: cryptsetup_proxy.hcl
+#               target: /root/vault/proxy.hcl
+#         networks:
+#             - hashidemo-net
+#         cap_add:
+#             - CAP_MKNOD
+#         device_cgroup_rules:
+#             - 'b 7:* rmw'
+#
+volumes:
+    oracledb_vol:
+    postgres_vol:
+    #encrypted:
+
+networks:
+    hashidemo-net:
+        driver: bridge

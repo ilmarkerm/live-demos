@@ -1,0 +1,1 @@
+luksdevicename /dev/sourcedevice /etc/vault/luks_keys.sock luks,_netdev,auto,nofail,timeout=60,headless=true
