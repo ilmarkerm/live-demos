@@ -51,22 +51,22 @@ services:
             - postgres_vol:/var/lib/postgresql
         networks:
             - hashidemo-net
-#     cryptsetup:
-#         image: hashidemo-cryptsetup
-#         build:
-#             context: hashidemo-cryptsetup/
-#         volumes:
-#             - encrypted:/encrypted
-#             - type: bind
-#               source: cryptsetup_proxy.hcl
-#               target: /root/vault/proxy.hcl
-#         networks:
-#             - hashidemo-net
-#         cap_add:
-#             - CAP_MKNOD
-#         device_cgroup_rules:
-#             - 'b 7:* rmw'
-#
+    # cryptsetup:
+    #     image: hashidemo-cryptsetup
+    #     build:
+    #         context: hashidemo-cryptsetup/
+    #     volumes:
+    #         - encrypted:/encrypted
+    #         - type: bind
+    #           source: cryptsetup_proxy.hcl
+    #           target: /root/vault/proxy.hcl
+    #     networks:
+    #         - hashidemo-net
+    #     cap_add:
+    #         - CAP_MKNOD
+    #     device_cgroup_rules:
+    #         - 'b 7:* rmw'
+
 volumes:
     oracledb_vol:
     postgres_vol:
