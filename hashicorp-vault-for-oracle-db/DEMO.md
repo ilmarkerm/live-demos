@@ -1,6 +1,6 @@
 # Secure secrets management for Oracle Databases using HashiCorp Vault
 
-Ilmar Kerm 2025 ilmar@ilmarkerm.eu https://ilmarkerm.eu
+Ilmar Kerm 2025-2026 ilmar@ilmarkerm.eu https://ilmarkerm.eu
 
 # Setup
 
@@ -9,7 +9,7 @@ VS Code change theme: ⌘K ⌘T
 Startup
 ```sh
 cd live-demos/hashicorp-vault-for-oracle-db
-docker compose up
+rm -f terraform/terraform.tfstate && docker compose up
 ```
 
 Entrypoints:
@@ -19,10 +19,12 @@ docker exec -it hashicorp-vault-for-oracle-db-vault-1 bash
 docker exec -it hashicorp-vault-for-oracle-db-sshd-1 bash
 ```
 
+[Open Vault Web](http://localhost:8200/ui/) root roken is: root
+
 vault:
 ```sh
-cd /live-demos/hashicorp-vault-for-oracle-db/terraform
-terraform apply -no-color
+cd /live-demos/hashicorp-vault-for-oracle-db/terraform &&
+    terraform apply -no-color
 ```
 
 # DEMO: plugins, tokens
@@ -81,20 +83,25 @@ vault token lookup
 
 vault:
 ```sh
-clear
 vault secrets list
-
+```
+```sh
 vault secrets enable -path=demokv -description="Secrets for DOAG demo" -version=2 kv
+```
+```sh
 vault secrets list
-
+```
+```sh
 # Write secret
 vault kv put "demokv/oracle/demodb/deployment" "username=c##deployment" "password=correct horse battery staple"
-
+```
+```sh
 # Read secret
 vault kv get demokv/oracle/demodb/deployment
-
+```
+```sh
 # In JSON format
-export VAULT_FORMAT=json
+export VAULT_FORMAT=json &&
 vault kv get demokv/oracle/demodb/deployment
 ```
 
@@ -112,13 +119,17 @@ NB! Proxy running on database host, connecting locally to Proxy that will silent
 select json_query(
     HttpUriType('http://127.0.0.1:8200/v1/demokv/data/oracle/demodb/deployment').getClob(),
     '$.data.data' returning json);
+```
 
+```sql
 SELECT json_query(
     JSON(
         HttpUriType('http://127.0.0.1:8200/v1/demokv/data/oracle/demodb/deployment').getClob()
     )
 , '$' RETURNING clob PRETTY);
+```
 
+```sql
 -- Creating a new secret
 DECLARE
     req   UTL_HTTP.REQ;
@@ -144,7 +155,9 @@ BEGIN
     UTL_HTTP.END_RESPONSE(resp);
 end;
 /
+```
 
+```sql
 select json_query(
     HttpUriType('http://127.0.0.1:8200/v1/demokv/data/oracle/demodb/newsecret').getClob(),
     '$.data.data' returning json);
@@ -212,8 +225,6 @@ Show role in GUI.
 
 database (fetch new database credential for "app1"):
 ```sh
-clear
-vault read database/creds/app1
 vault read database/creds/app1
 ```
 
@@ -237,16 +248,18 @@ Fetch credentials:
 
 ```sh
 vault read database/creds/pgapp1
-vault read database/creds/pgapp1
 ```
 
 # DEMO: Agent
 
 database (writing config file for application using secrets):
 ```sh
-clear
 less /live-demos/hashicorp-vault-for-oracle-db/agent_app1.ctmpl
+```
+```sh
 vault agent -config /live-demos/hashicorp-vault-for-oracle-db/agent_config.hcl
+```
+```sh
 cat /tmp/agent_app1.config
 ```
 
@@ -258,7 +271,7 @@ vault:
 /live-demos/hashicorp-vault-for-oracle-db/demos/register_ssh_signer.sh
 ```
 
-Same commands:
+Same commands (do not execute):
 
 ```sh
 clear
@@ -287,24 +300,36 @@ EOH
 SSH server:
 ```sh
 curl -o /config/trusted-user-ca-keys.pem http://vault:8200/v1/ssh-client-signer/public_key
+```
+```sh
 cat /config/trusted-user-ca-keys.pem
+```
+```sh
 echo "TrustedUserCAKeys /config/trusted-user-ca-keys.pem" >> /config/sshd/sshd_config
-
+```
+```sh
 docker restart hashicorp-vault-for-oracle-db-sshd-1
 ```
 
 database:
 ```sh
-clear
 ssh-keygen -t rsa
+```
+```sh
 cat /home/oracle/.ssh/id_rsa.pub
+```
 
+```sh
 # Demo the certificate output
 vault write ssh-client-signer/sign/oracle public_key=@$HOME/.ssh/id_rsa.pub
+```
 
+```sh
 # Write certificate to file
 vault write -field=signed_key ssh-client-signer/sign/oracle public_key=@$HOME/.ssh/id_rsa.pub > $HOME/.ssh/id_rsa-cert.pub
+```
 
+```sh
 ssh oracle@sshd -p 2222
 ```
 
@@ -363,7 +388,9 @@ BEGIN
     UTL_HTTP.END_RESPONSE(resp);
 end;
 /
+```
 
+```sql
 exec APEX_WEB_SERVICE.SET_REQUEST_HEADERS('Content-Type','application/json');
 SELECT
     apex_web_service.make_rest_request(
